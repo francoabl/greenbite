@@ -373,10 +373,6 @@ a {
 }
 
 .order-panel {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-  align-items: start;
   padding: 30px;
   border-radius: 26px;
   background: #fffdfa;
@@ -386,18 +382,29 @@ a {
 
 .order-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   margin-top: 18px;
 }
 
-.order-card {
-  min-height: 280px;
+.order-card .plan-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .order-card .btn {
   width: 100%;
   justify-content: center;
+  margin-top: 8px;
+}
+
+.recent-panel {
+  padding: 30px;
+  border-radius: 26px;
+  background: #fffdfa;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
 }
 
 .status-note {

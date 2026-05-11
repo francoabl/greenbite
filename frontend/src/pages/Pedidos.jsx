@@ -83,59 +83,55 @@ export default function Pedidos() {
           subtitle="Cada pedido vive en el microservicio de pedidos con su propia base."
         />
         <div className="order-panel">
-          <div>
-            <h3>Elige tu suscripcion</h3>
-            <p>
-              {user?.nombre ? (
-                <>Sesion activa: <strong>{user.nombre}</strong></>
-              ) : (
-                <>
-                  No hay sesion activa. <Link to="/login">Inicia sesion</Link>.
-                </>
-              )}
-            </p>
-            <div className="order-grid">
-              {plans.map((plan) => (
-                <OrderPlanCard
-                  key={plan.title}
-                  title={plan.title}
-                  people={plan.people}
-                  price={plan.price}
-                  bullets={plan.bullets}
-                  onOrder={() => handleOrderClick(plan)}
-                  disabled={orderStatus === "loading"}
-                />
-              ))}
-            </div>
-            {orderMessage ? <div className="status-note">{orderMessage}</div> : null}
+          <h3>Elige tu suscripcion</h3>
+          <p>
+            {user?.nombre ? (
+              <>Sesion activa: <strong>{user.nombre}</strong></>
+            ) : (
+              <>
+                No hay sesion activa. <Link to="/login">Inicia sesion</Link>.
+              </>
+            )}
+          </p>
+          <div className="order-grid">
+            {plans.map((plan) => (
+              <OrderPlanCard
+                key={plan.title}
+                title={plan.title}
+                people={plan.people}
+                price={plan.price}
+                bullets={plan.bullets}
+                onOrder={() => handleOrderClick(plan)}
+                disabled={orderStatus === "loading"}
+              />
+            ))}
           </div>
-          <div>
-            <h3>Pedidos recientes</h3>
-            {loading ? <div>Cargando...</div> : null}
-            {error ? <div>{error}</div> : null}
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Usuario</th>
-                  <th>Plan</th>
-                  <th>Estado</th>
-                  <th>Total</th>
+          {orderMessage ? <div className="status-note">{orderMessage}</div> : null}
+        </div>
+        <div className="recent-panel">
+          <h3>Pedidos recientes</h3>
+          {loading ? <div>Cargando...</div> : null}
+          {error ? <div>{error}</div> : null}
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pedidos.map((pedido) => (
+                <tr key={pedido.id}>
+                  <td>{pedido.id.slice(0, 8)}</td>
+                  <td>{pedido.plan}</td>
+                  <td>{pedido.status}</td>
+                  <td>${pedido.total?.toLocaleString("es-CL")}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {pedidos.map((pedido) => (
-                  <tr key={pedido.id}>
-                    <td>{pedido.id}</td>
-                    <td>{pedido.userId}</td>
-                    <td>{pedido.plan}</td>
-                    <td>{pedido.status}</td>
-                    <td>{pedido.total}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
       
