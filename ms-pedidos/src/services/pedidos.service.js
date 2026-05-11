@@ -35,8 +35,8 @@ async function createPedido(payload) {
   return pedido;
 }
 
-async function listPedidos() {
-  const pedidos = await repository.listPedidos();
+async function listPedidos(userId) {
+  const pedidos = await repository.listPedidos(userId);
   return { items: pedidos };
 }
 

@@ -5,8 +5,10 @@ async function create(payload) {
   return response.data;
 }
 
-async function list() {
-  const response = await clients.pedidos.get("/pedidos");
+async function list(userId) {
+  const response = await clients.pedidos.get("/pedidos", {
+    params: { userId }
+  });
   return response.data;
 }
 

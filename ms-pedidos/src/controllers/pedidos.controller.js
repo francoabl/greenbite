@@ -11,7 +11,7 @@ async function create(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    const data = await service.listPedidos();
+    const data = await service.listPedidos(req.query.userId);
     res.json(data);
   } catch (err) {
     next(err);

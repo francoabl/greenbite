@@ -1,9 +1,10 @@
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import BrandHeader from "../components/BrandHeader.jsx";
 import FeatureCard from "../components/FeatureCard.jsx";
 import Footer from "../components/Footer.jsx";
 import PlanCard from "../components/PlanCard.jsx";
 import SectionTitle from "../components/SectionTitle.jsx";
-import { Link } from "react-router-dom";
 
 const plans = [
   {
@@ -42,16 +43,27 @@ const features = [
     copy: "Pausa o cambia tu plan en segundos desde la plataforma."
   },
   {
-    title: "BFF inteligente",
-    copy: "Respuestas unificadas para una experiencia sin friccion."
+    title: "Envio fresco",
+    copy: "Entregas programadas en bolsas reutilizables con empaque compostable."
   },
   {
-    title: "Data per Service",
-    copy: "Pedidos y usuarios viven en bases separadas y seguras."
+    title: "Sin minimos",
+    copy: "Una cesta o las que quieras. Sin compromiso ni permanencia."
   }
 ];
 
 export default function Home() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location.hash]);
+
   return (
     <div className="page">
       <BrandHeader />
@@ -103,7 +115,7 @@ export default function Home() {
         <SectionTitle
           eyebrow="Proceso"
           title="Del campo al plato en cuatro movimientos"
-          subtitle="Microservicios aislados para usuarios y pedidos, coordinados por un BFF rapido."
+          subtitle="Seleccion, lavado y empaque en menos de 12 horas para maxima frescura."
         />
         <div className="steps">
           <div className="step">1. Productores cargan lotes disponibles</div>

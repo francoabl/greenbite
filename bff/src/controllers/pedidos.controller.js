@@ -12,7 +12,7 @@ async function create(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    const data = await service.list();
+    const data = await service.list(req.userId);
     res.json(data);
   } catch (err) {
     next(mapServiceError(err));

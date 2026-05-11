@@ -1,6 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth.js";
 
 export default function BrandHeader() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <header className="header">
       <div className="container header-inner">
@@ -8,13 +17,25 @@ export default function BrandHeader() {
           GreenBite
         </Link>
         <nav className="nav">
-          <a href="#planes">Planes</a>
-          <a href="#proceso">Proceso</a>
-          <a href="#ecosistema">Ecosistema</a>
+          <Link to="/#planes">Planes</Link>
+          <Link to="/#proceso">Proceso</Link>
+          <Link to="/#ecosistema">Ecosistema</Link>
         </nav>
-        <Link className="btn" to="/login">
-          Acceso
-        </Link>
+        {user ? (
+          <div className="header-user">
+            <span className="header-user-name">{user.nombre}</span>
+            <Link className="btn" to="/pedidos">
+              Mis pedidos
+            </Link>
+            <button className="btn btn-outline" onClick={handleLogout}>
+              Salir
+            </button>
+          </div>
+        ) : (
+          <Link className="btn" to="/login">
+            Acceso
+          </Link>
+        )}
       </div>
     </header>
   );

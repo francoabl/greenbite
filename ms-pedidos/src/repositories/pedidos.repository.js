@@ -10,11 +10,16 @@ async function createPedido({ id, userId, plan, status, total }) {
   return mapPedido(result.rows[0]);
 }
 
-async function listPedidos() {
+async function listPedidos(userId) {
   const pool = getPool();
-  const result = await pool.query(
-    "SELECT id, user_id, plan, status, total, created_at FROM pedidos ORDER BY created_at DESC"
-  );
+  let query = "SELECT id, user_id, plan, status, total, created_at FROM pedidos";
+  const params = [];
+  if (userId) {
+    query += " WHERE user_id = $1";
+    params.push(userId);
+  }
+  query += " ORDER BY created_at DESC";
+  const result = await pool.query(query, params);
   return result.rows.map(mapPedido);
 }
 

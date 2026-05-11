@@ -94,6 +94,26 @@ a {
   letter-spacing: 1.2px;
 }
 
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--leaf);
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--line);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+}
+
 .hero {
   padding-top: 80px;
 }
