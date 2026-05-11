@@ -1,0 +1,8 @@
+Repositorio principal: https://github.com/tu-usuario/greenbite
+- frontend: https://github.com/tu-usuario/greenbite-frontend
+- bff: https://github.com/tu-usuario/greenbite-bff
+- ms-usuarios: https://github.com/tu-usuario/greenbite-ms-usuarios
+- ms-pedidos: https://github.com/tu-usuario/greenbite-ms-pedidos
+
+Descripcion:
+Proyecto GreenBite con frontend, BFF y microservicios separados por base de datos.

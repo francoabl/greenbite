@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS pedidos (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+  plan INT NOT NULL,
+  status TEXT NOT NULL,
+  total INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
