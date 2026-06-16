@@ -38,8 +38,8 @@ const plans = [
 ];
 
 export default function Pedidos() {
-  const { pedidos, loading, error, createPedido } = usePedidos();
   const { user } = useAuth();
+  const { pedidos, loading, error, createPedido } = usePedidos(user?.id);
   const [orderStatus, setOrderStatus] = useState("idle");
   const [orderMessage, setOrderMessage] = useState("");
   const [modalState, setModalState] = useState({ isOpen: false, planData: null });
@@ -106,12 +106,16 @@ export default function Pedidos() {
               />
             ))}
           </div>
-          {orderMessage ? <div className="status-note">{orderMessage}</div> : null}
+          {orderMessage ? (
+            <div className={`alert ${orderStatus === "error" ? "alert-error" : "alert-success"}`}>
+              {orderMessage}
+            </div>
+          ) : null}
         </div>
         <div className="recent-panel">
           <h3>Pedidos recientes</h3>
-          {loading ? <div>Cargando...</div> : null}
-          {error ? <div>{error}</div> : null}
+          {loading ? <div className="status-note">Cargando...</div> : null}
+          {error ? <div className="alert alert-error">{error}</div> : null}
           <table className="table">
             <thead>
               <tr>
@@ -130,6 +134,15 @@ export default function Pedidos() {
                   <td>${pedido.total?.toLocaleString("es-CL")}</td>
                 </tr>
               ))}
+              {!loading && pedidos.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="table-empty">
+                    {user?.id
+                      ? "Aun no tienes pedidos. Elige una suscripcion arriba."
+                      : "Inicia sesion para ver tus pedidos."}
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>

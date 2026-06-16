@@ -1,8 +1,33 @@
-Repositorio principal: https://github.com/tu-usuario/greenbite
-- frontend: https://github.com/tu-usuario/greenbite-frontend
-- bff: https://github.com/tu-usuario/greenbite-bff
-- ms-usuarios: https://github.com/tu-usuario/greenbite-ms-usuarios
-- ms-pedidos: https://github.com/tu-usuario/greenbite-ms-pedidos
+GreenBite - Enlaces de repositorios GitHub
+==========================================
 
-Descripcion:
-Proyecto GreenBite con frontend, BFF y microservicios separados por base de datos.
+Repositorio principal (monorepo):
+  https://github.com/francoabl/greenbite
+
+Este proyecto se versiona como un monorepo: un unico repositorio que contiene
+todos los componentes en carpetas separadas. Cada componente es autonomo
+(tiene su propio package.json o pom.xml y su README).
+
+Componentes dentro del repositorio:
+  - frontend/      Aplicacion React + Vite (interfaz de usuario)
+                   https://github.com/francoabl/greenbite/tree/main/frontend
+  - bff/           Backend For Frontend en Node.js + Express (orquestador)
+                   https://github.com/francoabl/greenbite/tree/main/bff
+  - ms-usuarios/   Microservicio de usuarios en Java + Spring Boot (JPA, PostgreSQL)
+                   https://github.com/francoabl/greenbite/tree/main/ms-usuarios
+  - ms-pedidos/    Microservicio de pedidos en Java + Spring Boot (JPA, PostgreSQL)
+                   https://github.com/francoabl/greenbite/tree/main/ms-pedidos
+
+Documentacion general:
+  - docs/          Diagramas, analisis de patrones, informes y specs OpenAPI
+                   https://github.com/francoabl/greenbite/tree/main/docs
+
+Descripcion de cada componente:
+  - frontend:    SPA que consume exclusivamente el BFF. Maneja login/registro y
+                 el flujo de suscripciones (pedidos).
+  - bff:         Unico punto de entrada para el frontend. Orquesta y normaliza las
+                 respuestas de los microservicios y valida el token JWT.
+  - ms-usuarios: Autenticacion (registro/login con JWT + BCrypt) y CRUD de usuarios.
+                 Base de datos propia: usuarios_db.
+  - ms-pedidos:  CRUD de pedidos con logica de precios por plan.
+                 Base de datos propia: pedidos_db.

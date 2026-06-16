@@ -1,7 +1,11 @@
 # Análisis de Patrones y Arquetipos
 
-## GreenBite — Evaluación Parcial N°2
+## GreenBite — Evaluación Parcial N°3
 ### Desarrollo Fullstack III
+
+> Documento actualizado tras migrar los microservicios **ms-usuarios** y
+> **ms-pedidos** de Node.js/Express a **Java 17 + Spring Boot** con persistencia
+> **JPA/Hibernate**. El frontend (React) y el BFF (Node/Express) se mantienen.
 
 ---
 
@@ -40,10 +44,11 @@ ventajas que aportan en términos de mantenibilidad, escalabilidad y desacoplami
           ▼                                 ▼
  ┌─────────────────┐             ┌─────────────────┐
  │  ms-usuarios    │             │  ms-pedidos     │
- │  Express.js     │             │  Express.js     │
+ │  Spring Boot    │             │  Spring Boot    │
+ │  (Java 17, JPA) │             │  (Java 17, JPA) │
  │  :4001          │             │  :4002          │
  └────────┬────────┘             └────────┬────────┘
-          │                               │
+          │ JPA / Hibernate               │ JPA / Hibernate
           ▼                               ▼
  ┌─────────────────┐             ┌─────────────────┐
  │  usuarios_db    │             │  pedidos_db     │
@@ -51,6 +56,11 @@ ventajas que aportan en términos de mantenibilidad, escalabilidad y desacoplami
  │  :5433          │             │  :5434          │
  └─────────────────┘             └─────────────────┘
 ```
+
+> **Diversidad tecnológica (intencional):** **React** (frontend) +
+> **Node.js/Express** (BFF) + **Java/Spring Boot** (microservicios), integrados
+> mediante API REST. Esto demuestra el uso de distintos lenguajes y tecnologías
+> cumpliendo los requerimientos del cliente.
 
 ---
 
@@ -119,20 +129,24 @@ Ningún servicio accede a la base de datos de otro.
 - `docker-compose.yml` define dos contenedores PostgreSQL: `usuarios_db`
   (puerto 5433) y `pedidos_db` (puerto 5434), cada uno con volumen persistente
   propio.
-- `ms-usuarios/src/database/db.js` se conecta exclusivamente a `usuarios_db`.
-- `ms-pedidos/src/database/db.js` se conecta exclusivamente a `pedidos_db`.
+- `ms-usuarios/src/main/resources/application.properties` configura el datasource
+  que apunta exclusivamente a `usuarios_db`.
+- `ms-pedidos/src/main/resources/application.properties` apunta exclusivamente a
+  `pedidos_db`. Cada servicio gestiona su esquema con Hibernate (`ddl-auto=update`).
 
 ---
 
 ### 3.3. Microservicios
 
 **Descripción:**
-La lógica de negocio se divide en dos microservicios independientes:
-- `ms-usuarios`: Autenticación (registro/login con JWT + bcrypt) y CRUD de usuarios.
+La lógica de negocio se divide en dos microservicios independientes, ambos
+construidos con **Java 17 + Spring Boot 3.5** (Spring Web + Spring Data JPA):
+- `ms-usuarios`: Autenticación (registro/login con JWT + BCrypt) y CRUD de usuarios.
 - `ms-pedidos`: CRUD de pedidos con lógica de precios de planes.
 
-Ambos se comunican exclusivamente mediante APIs HTTP REST y no existe
-comunicación directa entre ellos.
+Ambos exponen su API documentada con **Swagger/OpenAPI** (springdoc) y se
+comunican con el BFF exclusivamente mediante HTTP REST; no existe comunicación
+directa entre ellos.
 
 **Problema que resuelve:**
 - Un monolito centraliza toda la lógica, dificultando el escalado y el mantenimiento.
@@ -245,86 +259,86 @@ export default function usePedidos() {
 **Tipo:** Patrón de diseño de persistencia — Backend
 
 **Ubicación:**
-- `ms-usuarios/src/repositories/usuarios.repository.js`
-- `ms-pedidos/src/repositories/pedidos.repository.js`
+- `ms-usuarios/src/main/java/com/greenbite/usuarios/repository/UsuarioRepository.java`
+- `ms-pedidos/src/main/java/com/greenbite/pedidos/repository/PedidoRepository.java`
 
 **Descripción:**
-El Repository Pattern separa la lógica de acceso a datos (SQL) de la lógica de
-negocio (services). Los repositorios son los únicos responsables de interactuar
-con la base de datos, mientras que los servicios se enfocan en las reglas de
-negocio.
+El Repository Pattern separa el acceso a datos de la lógica de negocio. En la
+versión Spring Boot se implementa con **Spring Data JPA**: cada repositorio es una
+interfaz que extiende `JpaRepository`, y Spring genera la implementación en tiempo
+de ejecución (incluidas las *query methods* derivadas del nombre del método).
 
 **Problema que resuelve:**
-- Sin este patrón, las consultas SQL estarían dispersas en los servicios,
-  mezclando lógica de negocio con detalles de persistencia. Esto dificulta el
-  mantenimiento, las pruebas y el cambio de base de datos.
+- Sin este patrón, las consultas estarían dispersas en los servicios, mezclando
+  lógica de negocio con detalles de persistencia. Esto dificulta el mantenimiento,
+  las pruebas y el cambio de base de datos.
 
 **Ventajas obtenidas:**
-- Cambiar de PostgreSQL a otra base de datos solo requiere modificar los
-  repositorios, no los servicios.
-- Las pruebas unitarias pueden mockear el repositorio para probar la lógica de
-  negocio sin base de datos real.
-- Centraliza las consultas SQL, facilitando la optimización y la detección de
-  errores.
+- No se escribe SQL manual: JPA/Hibernate genera las consultas; los métodos
+  derivados (`findByEmail`, `findByUserIdOrderByCreatedAtDesc`) son declarativos.
+- Las pruebas unitarias **mockean el repositorio** (con Mockito) para probar la
+  lógica de negocio sin base de datos real.
+- El mapeo objeto-relacional se centraliza en las entidades `@Entity`.
 
-```javascript
-// repositories/pedidos.repository.js — solo acceso a datos
-async function listPedidos(userId) {
-  const pool = getPool();
-  let query = "SELECT * FROM pedidos";
-  const params = [];
-  if (userId) { query += " WHERE user_id = $1"; params.push(userId); }
-  query += " ORDER BY created_at DESC";
-  const result = await pool.query(query, params);
-  return result.rows.map(mapPedido);
+```java
+// repository/PedidoRepository.java — interfaz; Spring genera la implementacion
+@Repository
+public interface PedidoRepository extends JpaRepository<Pedido, UUID> {
+    List<Pedido> findAllByOrderByCreatedAtDesc();
+    List<Pedido> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }
 
-// services/pedidos.service.js — solo lógica de negocio
-async function listPedidos(userId) {
-  const pedidos = await repository.listPedidos(userId);  // delega en repo
-  return { items: pedidos };
+// service/PedidoService.java — solo logica de negocio, delega en el repositorio
+public List<PedidoResponse> list(UUID userId) {
+    List<Pedido> pedidos = (userId != null)
+            ? repository.findByUserIdOrderByCreatedAtDesc(userId)
+            : repository.findAllByOrderByCreatedAtDesc();
+    return pedidos.stream().map(PedidoResponse::from).toList();
 }
 ```
 
 ---
 
-### 4.4. Singleton Pattern (Backend)
+### 4.4. Singleton / Inversión de Control (Backend)
 
 **Tipo:** Patrón de diseño creacional — Backend
 
-**Ubicación:**
-- `ms-usuarios/src/database/db.js`
-- `ms-pedidos/src/database/db.js`
+**Ubicación:** contenedor de Spring (IoC) en ambos microservicios.
 
 **Descripción:**
-El Singleton Pattern asegura que exista una única instancia del pool de conexiones
-a la base de datos, reutilizada en toda la aplicación. Se implementa mediante un
-módulo que cachea el pool en una variable de módulo.
+Spring Boot aplica el patrón Singleton de forma nativa a través de su contenedor de
+**Inversión de Control (IoC)**: por defecto, cada bean (`@Service`, `@Repository`,
+`@Component`, `@Configuration`) se crea **una sola vez** y se reutiliza mediante
+**inyección de dependencias**. El pool de conexiones a la base de datos
+(**HikariCP**, autoconfigurado por Spring) también es un único bean compartido.
 
 **Problema que resuelve:**
-- Crear una nueva conexión a la base de datos en cada operación sería ineficiente
-  y consumiría recursos innecesarios. Sin un singleton, cada consulta SQL crearía
-  una nueva conexión.
+- Crear una nueva conexión o una nueva instancia de servicio en cada operación
+  sería ineficiente. Se necesita una única instancia compartida y reutilizable.
 
 **Ventajas obtenidas:**
-- Rendimiento: el pool de conexiones se crea una sola vez y se reutiliza,
-  reduciendo la sobrecarga de conexiones.
-- Consistencia: todos los módulos comparten la misma configuración de conexión.
-- Control centralizado: la lógica de conexión (timeout, pool size, etc.) se define
-  en un solo lugar.
+- Rendimiento: el pool HikariCP se crea una vez y reutiliza las conexiones.
+- Consistencia: todos los componentes comparten las mismas instancias (servicios,
+  repositorios, encoder, JwtService).
+- Sin código *boilerplate*: el ciclo de vida lo gestiona el contenedor de Spring.
 
-```javascript
-// database/db.js — implementación Singleton
-let pool;
+```java
+// El servicio es un singleton gestionado por Spring; recibe sus dependencias
+// (tambien singletons) por inyeccion de constructor.
+@Service
+public class UsuarioService {
+    private final UsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-function getPool() {
-  if (!pool) {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  }
-  return pool;
+    public UsuarioService(UsuarioRepository repository,
+                          PasswordEncoder passwordEncoder,
+                          JwtService jwtService) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
 }
-
-module.exports = { getPool };
 ```
 
 ---
@@ -378,18 +392,18 @@ function createClients() {
 |--------|------|------|----------------------|
 | **Provider** | Estructural | Frontend | Prop drilling del estado de autenticación |
 | **Custom Hooks** | Comportamiento | Frontend | Duplicación de lógica de estado/efectos |
-| **Repository** | Persistencia | Backend (ms) | Mezcla de lógica de negocio con SQL |
-| **Singleton** | Creacional | Backend (ms) | Múltiples conexiones a BD innecesarias |
+| **Repository** | Persistencia | Backend (ms) | Mezcla de lógica de negocio con acceso a datos (Spring Data JPA) |
+| **Singleton / IoC** | Creacional | Backend (ms) | Instancias y conexiones a BD innecesarias (beans + HikariCP) |
 | **Factory** | Creacional | Backend (BFF) | Duplicación en creación de clientes HTTP |
 
 ---
 
 ## 6. Arquetipos de Proyecto
 
-Cada componente del backend sigue un arquetipo de Node.js/Express con estructura
-modular estandarizada:
+El BFF sigue el arquetipo de Node.js/Express; los microservicios siguen el
+arquetipo estándar de **Spring Boot (Maven)** en capas.
 
-### Backend For Frontend
+### Backend For Frontend (Node.js/Express)
 ```
 bff/
   src/
@@ -400,32 +414,37 @@ bff/
     utils/         → Utilidades (mapeo de errores)
 ```
 
-### Microservicio Usuarios
+### Microservicio Usuarios (Java/Spring Boot)
 ```
 ms-usuarios/
-  src/
-    routes/        → Definición de endpoints REST
-    controllers/   → Manejo de HTTP requests
-    services/      → Lógica de negocio (registro, login)
-    repositories/  → Acceso a base de datos
-    models/        → Mapeo de datos
-    database/      → Conexión y schema SQL
-    middleware/    → Error handling
-    utils/         → Clases de error HTTP
+  pom.xml          → Dependencias Maven (Spring Web, Data JPA, JWT, Swagger)
+  src/main/java/com/greenbite/usuarios/
+    web/           → Controllers REST (@RestController)
+    service/       → Lógica de negocio (registro, login)
+    repository/    → Spring Data JPA (interfaces JpaRepository)
+    entity/        → Entidades JPA (@Entity)
+    dto/           → Objetos de request/response
+    security/      → JwtService (generación de tokens)
+    config/        → CORS, BCrypt, OpenAPI
+    exception/     → ApiException + GlobalExceptionHandler
+  src/main/resources/application.properties → Datasource + JPA
+  src/test/java/...                          → Pruebas JUnit
 ```
 
-### Microservicio Pedidos
+### Microservicio Pedidos (Java/Spring Boot)
 ```
 ms-pedidos/
-  src/
-    routes/        → Definición de endpoints REST
-    controllers/   → Manejo de HTTP requests
-    services/      → Lógica de negocio (planes, totales)
-    repositories/  → Acceso a base de datos
-    models/        → Mapeo de datos
-    database/      → Conexión y schema SQL
-    middleware/    → Error handling
-    utils/         → Clases de error HTTP
+  pom.xml          → Dependencias Maven (Spring Web, Data JPA, Swagger)
+  src/main/java/com/greenbite/pedidos/
+    web/           → Controllers REST (@RestController)
+    service/       → Lógica de negocio (planes, totales)
+    repository/    → Spring Data JPA (interfaces JpaRepository)
+    entity/        → Entidades JPA (@Entity)
+    dto/           → Objetos de request/response
+    config/        → CORS, OpenAPI
+    exception/     → ApiException + GlobalExceptionHandler
+  src/main/resources/application.properties → Datasource + JPA
+  src/test/java/...                          → Pruebas JUnit
 ```
 
 Este arquetipo asegura:
@@ -440,36 +459,58 @@ Este arquetipo asegura:
 
 | Práctica | Implementación |
 |----------|---------------|
-| **Código modular** | Cada funcionalidad en su propio archivo (routes/controllers/services/repositories) |
+| **Código modular** | Separación en capas (web/service/repository/entity en los ms; routes/controllers/services en el BFF) |
 | **Variables claras** | Nombres descriptivos en inglés/español (`createPedido`, `findByEmail`) |
-| **Manejo de errores** | Middleware global de errores con clases HTTP personalizadas (400, 401, 404, 409) |
-| **Pruebas unitarias** | Jest con mocks de repositorios para tests de servicios |
-| **Variables de entorno** | Configuración por `.env` (puertos, URLs, JWT secret) |
+| **Manejo de errores** | BFF: middleware global. Microservicios: `@RestControllerAdvice` con códigos HTTP (400, 401, 404, 409) |
+| **Pruebas unitarias** | JUnit 5 + Mockito en los microservicios (mocks de repositorios); cobertura con JaCoCo |
+| **Documentación de API** | Swagger/OpenAPI (springdoc) en cada microservicio |
+| **Variables de entorno** | Configuración por `.env` (BFF) y `application.properties` (microservicios) |
 | **Persistencia de sesión** | AuthContext + localStorage para mantener sesión entre recargas |
 
 ---
 
 ## 8. Pruebas Unitarias
 
-### Microservicio Usuarios
-```javascript
-// tests/usuarios.service.test.js
-describe("usuarios.service", () => {
-  it("registerUser crea usuario y token", async () => { ... });
-  it("loginUser rechaza credenciales invalidas", async () => { ... });
-});
+Los microservicios se prueban con **JUnit 5 + Mockito**. Los repositorios se
+mockean para probar la lógica de negocio de forma aislada (sin base de datos). La
+cobertura se mide con **JaCoCo** (`mvnw test` genera `target/site/jacoco/index.html`).
+
+### Microservicio Usuarios (`UsuarioServiceTest`)
+```java
+@ExtendWith(MockitoExtension.class)
+class UsuarioServiceTest {
+    @Mock UsuarioRepository repository;
+    @Mock PasswordEncoder passwordEncoder;
+    @Mock JwtService jwtService;
+    @InjectMocks UsuarioService service;
+
+    @Test
+    void registerOk() { /* crea usuario, hashea password, devuelve token */ }
+
+    @Test
+    void loginWrongPassword() { /* credenciales invalidas -> 401 */ }
+}
 ```
 
-### Microservicio Pedidos
-```javascript
-// tests/pedidos.service.test.js
-describe("pedidos.service", () => {
-  it("createPedido calcula total", async () => { ... });
-});
+### Microservicio Pedidos (`PedidoServiceTest`)
+```java
+@ExtendWith(MockitoExtension.class)
+class PedidoServiceTest {
+    @Mock PedidoRepository repository;
+    @InjectMocks PedidoService service;
+
+    @Test
+    void createOk() { /* plan valido calcula total y queda PENDIENTE */ }
+
+    @Test
+    void createInvalidPlan() { /* plan inexistente -> 400 */ }
+}
 ```
 
-Ambos tests utilizan Jest con mocking de los repositorios, lo que permite probar
-la lógica de negocio sin necesidad de una base de datos real.
+**Resultados:** 15 pruebas en ms-usuarios y 13 en ms-pedidos (28 en total), todas
+en verde. Cobertura de instrucciones: **70%** (ms-usuarios) y **64%** (ms-pedidos),
+superando el mínimo del 60% exigido. El detalle está en el *Informe de Pruebas
+Unitarias* (`docs/informe-pruebas-unitarias.pdf`).
 
 ---
 

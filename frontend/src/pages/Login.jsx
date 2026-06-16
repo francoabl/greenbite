@@ -17,10 +17,14 @@ export default function Login() {
     setSuccess("");
     try {
       if (mode === "login") {
-        await login(form.email, form.password);
+        await login(form.email.trim(), form.password);
         setSuccess("Login exitoso. Redirigiendo...");
       } else {
-        await register(form);
+        await register({
+          nombre: form.nombre.trim(),
+          email: form.email.trim(),
+          password: form.password
+        });
         setSuccess("Registro exitoso. Redirigiendo...");
       }
       setTimeout(() => navigate("/pedidos"), 400);
@@ -45,7 +49,12 @@ export default function Login() {
             <button
               className="btn"
               type="button"
-              onClick={() => setMode(mode === "login" ? "register" : "login")}
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setFormError("");
+                setSuccess("");
+                setForm({ nombre: "", email: "", password: "" });
+              }}
             >
               Cambiar a {mode === "login" ? "registro" : "login"}
             </button>
@@ -85,8 +94,8 @@ export default function Login() {
             <button className="btn primary" type="submit" disabled={status === "loading"}>
               {mode === "login" ? "Entrar" : "Registrarme"}
             </button>
-            {success ? <div>{success}</div> : null}
-            {displayError ? <div>{displayError}</div> : null}
+            {success ? <div className="alert alert-success">{success}</div> : null}
+            {displayError ? <div className="alert alert-error">{displayError}</div> : null}
           </form>
         </div>
       </section>

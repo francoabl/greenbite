@@ -1,1 +1,40 @@
-﻿.agents/
+# Herramientas / agentes
+.agents/
+.claude/
+
+# Node.js (BFF y frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build del frontend
+dist/
+frontend/dist/
+
+# Java / Maven (microservicios Spring Boot)
+target/
+*.class
+
+# Maven Wrapper (se descarga solo)
+.mvn/wrapper/maven-wrapper.jar
+
+# Python (scripts de generacion de docs)
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# Variables de entorno locales (se versionan los .env.example)
+.env
+**/.env
+
+# IDE / editores
+.idea/
+.vscode/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
