@@ -92,6 +92,13 @@ Toda la documentación está en la carpeta [`docs/`](docs/README.md):
 - **API REST (Swagger/OpenAPI):** [docs/api/README.md](docs/api/README.md) — Swagger UI en `:4001/swagger-ui.html` y `:4002/swagger-ui.html`
 - **Análisis de patrones:** [docs/analisis-patrones.md](docs/analisis-patrones.md)
 
+### Documentación de la API con Swagger
+Cada microservicio expone su API documentada e interactiva con Swagger UI:
+
+| MS Usuarios (`:4001/swagger-ui.html`) | MS Pedidos (`:4002/swagger-ui.html`) |
+|---|---|
+| ![Swagger MS Usuarios](docs/img/swagger-usuarios.png) | ![Swagger MS Pedidos](docs/img/swagger-pedidos.png) |
+
 ## Estructura de Repositorios (Git)
 Esta solución maneja submódulos/repositorios para separar dominios. Si deseas clonarlo u operar de a partes:
 - Repositorio principal: `/greenbite`
