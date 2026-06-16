@@ -510,7 +510,7 @@ class PedidoServiceTest {
 **Resultados:** 15 pruebas en ms-usuarios y 13 en ms-pedidos (28 en total), todas
 en verde. Cobertura de instrucciones: **70%** (ms-usuarios) y **64%** (ms-pedidos),
 superando el mínimo del 60% exigido. El detalle está en el *Informe de Pruebas
-Unitarias* (`docs/informe-pruebas-unitarias.pdf`).
+Unitarias* (`docs/informe-pruebas-unitarias.docx`).
 
 ---
 

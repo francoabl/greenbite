@@ -2,6 +2,8 @@
 
 Plataforma de suscripciones de comida orgánica basada en una arquitectura de microservicios con un patrón de Base de Datos por Servicio (Database per Service) y un Backend For Frontend (BFF).
 
+![GreenBite — interfaz web](docs/img/greenbite-home.png)
+
 ## Arquitectura del Proyecto
 
 El sistema está dividido en los siguientes componentes, aplicando **distintos lenguajes y tecnologías** por capa:
@@ -85,8 +87,8 @@ Una vez que todas las terminales indiquen que los servidores están escuchando, 
 ## Documentación y entregables
 Toda la documentación está en la carpeta [`docs/`](docs/README.md):
 - **Diagrama de arquitectura:** [docs/diagrama-arquitectura.png](docs/diagrama-arquitectura.png)
-- **Informe de persistencia (JPA):** [docs/informe-persistencia.pdf](docs/informe-persistencia.pdf)
-- **Informe de pruebas unitarias:** [docs/informe-pruebas-unitarias.pdf](docs/informe-pruebas-unitarias.pdf)
+- **Informe de persistencia (JPA):** [docs/informe-persistencia.docx](docs/informe-persistencia.docx)
+- **Informe de pruebas unitarias:** [docs/informe-pruebas-unitarias.docx](docs/informe-pruebas-unitarias.docx)
 - **API REST (Swagger/OpenAPI):** [docs/api/README.md](docs/api/README.md) — Swagger UI en `:4001/swagger-ui.html` y `:4002/swagger-ui.html`
 - **Análisis de patrones:** [docs/analisis-patrones.md](docs/analisis-patrones.md)
 
