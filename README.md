@@ -15,6 +15,8 @@ El sistema está dividido en los siguientes componentes, aplicando **distintos l
 
 > Las tablas se crean automáticamente al arrancar cada microservicio (Hibernate `ddl-auto=update`).
 
+![Diagrama de arquitectura de microservicios](docs/diagrama-arquitectura.png)
+
 ## Requisitos Previos
 - **JDK 17** (para los microservicios Spring Boot). No necesitas instalar Maven: cada microservicio incluye el **Maven Wrapper** (`mvnw`).
 - **Node.js** (v18 o superior) y **npm** (para el BFF y el frontend).
@@ -98,6 +100,15 @@ Cada microservicio expone su API documentada e interactiva con Swagger UI:
 | MS Usuarios (`:4001/swagger-ui.html`) | MS Pedidos (`:4002/swagger-ui.html`) |
 |---|---|
 | ![Swagger MS Usuarios](docs/img/swagger-usuarios.png) | ![Swagger MS Pedidos](docs/img/swagger-pedidos.png) |
+
+### Pruebas unitarias y cobertura
+45 pruebas unitarias (JUnit 5 + Mockito), todas en verde, con cobertura medida por JaCoCo: **ms-usuarios 82.5%** y **ms-pedidos 78.7%** (ambos sobre el mínimo del 60%).
+
+![Cobertura de pruebas unitarias (JaCoCo)](docs/cobertura-chart.png)
+
+| Ejecución ms-usuarios (24 tests) | Ejecución ms-pedidos (21 tests) |
+|---|---|
+| ![Pruebas ms-usuarios](docs/evidencia/tests-ms-usuarios.png) | ![Pruebas ms-pedidos](docs/evidencia/tests-ms-pedidos.png) |
 
 ## Estructura de Repositorios (Git)
 Esta solución maneja submódulos/repositorios para separar dominios. Si deseas clonarlo u operar de a partes:
